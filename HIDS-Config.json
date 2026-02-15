@@ -1,0 +1,10 @@
+{
+    "Paths":  [
+                  "C:\\HIDS_Test\\demo.txt"
+              ],
+    "SMTPServer":  "email_smtp.gmail.com",
+    "SMTPPort":  587,
+    "From":  "XX@gmail.com",
+    "Username":  "XX@gmail.com",
+    "To":  "XX@gmail.com"
+}
