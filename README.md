@@ -8,17 +8,15 @@ C:\HIDS_Project\
 
 ├── Data\
 
-│   ├── HIDS-Config.json          ← To create manually
+│   ├── HIDS-Config.json          ← To create manually : HIDS-Config.json is a JSON-formatted configuration file that stores essential operational parameters for the HIDS system, including SMTP server settings for email alerts and the list of file paths to monitor for integrity violations. The file must be created manually before the first execution of HIDS-Monitor.ps1, typically using the Configure-HIDS.ps1 setup script, as the monitoring system cannot function without these configuration parameters. This file contains structured data including SMTP server address, port number, sender and recipient email addresses, and an array of absolute file paths that the system will continuously monitor for unauthorized modifications. Unlike HIDS-Baseline.dat, this file is human-readable and can be manually edited with any text editor, allowing administrators to add comments, modify monitored paths, or update SMTP settings as needed. The file is loaded at the beginning of each script execution and its parameters are used throughout the monitoring process to determine which files to watch and how to send security alerts.
 
 │   ├── SMTP_Credential.xml       ← To create with with PowerShell 
 
-│   └── HIDS-Baseline.dat         ← Automatically created during the first execution of HIDS-Monitor.ps1
+│   └── HIDS-Baseline.dat         ← Automatically created during the first execution of HIDS-Monitor.ps1 : PowerShell-serialized binary file that stores the SHA256 hash values of all monitored files, serving as the reference point for detecting unauthorized modifications. The file is automatically created during the first execution of HIDS-Monitor.ps1 when no baseline exists, and it is subsequently updated whenever file changes are detected and verified. This file contains a hashtable mapping each monitored file path to its corresponding SHA256 hash, enabling the system to identify integrity violations by comparing current file hashes against the stored baseline values. The file cannot be manually edited or commented because it uses PowerShell's CliXML serialization format, which requires exact binary structure for successful deserialization by the Import-Clixml command.
 
 │
 
 └── HIDS-Monitor.ps1               ← Main script
-
-
 This system is designed to monitor the integrity of specific files and send email alerts to an administrator as soon as a change is detected. To achieve this, I separated the architecture into several components for greater clarity and security. The core engine is the HIDS-Monitor.ps1 script, which contains all the monitoring logic. Parameters, such as the paths of the files to monitor and the SMTP server information, are stored in an external JSON configuration file named HIDS-Config.json. SMTP credentials are managed securely using an SMTP_Credential.xml file, which stores the password in encrypted form. Integrity verification relies on a baseline named HIDS-Baseline.dat. This baseline is created the first time the HIDS-Monitor.ps1 script is run. The script calculates the SHA256 cryptographic hash of each target file using the Get-IntegrityHash function and stores these hashes in the HIDS-Baseline.dat file.
 
 Once this baseline is established, the script enters a continuous monitoring loop (while ($true)). At regular intervals, it recalculates the hash of each file and compares it to the one stored in the baseline. If a hash differs, the script identifies a "CHANGE". If a file is inaccessible or deleted, the hash function returns a null value, which is interpreted as a "DELETION".
