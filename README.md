@@ -44,9 +44,15 @@ Structure complète du dossier
 
 C:\HIDS_Project\
 │
+
 ├── Data\
+
 │   ├── HIDS-Config.json          ← À créer manuellement
+
 │   ├── SMTP_Credential.xml       ← À créer avec le script PowerShell
+
 │   └── HIDS-Baseline.dat         ← Créé automatiquement au 1er lancement
+
 │
+
 └── HIDS-Monitor.ps1               ← Le script principal
