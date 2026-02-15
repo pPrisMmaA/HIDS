@@ -25,35 +25,36 @@ Once this baseline is established, the script enters a continuous monitoring loo
 
 When a change or deletion is detected, the Send-HIDSAlert function is immediately called. It uses the Send-MailMessage cmdlet with an SSL connection to send a secure notification. The alert details are sent to the destination email address defined in the configuration file. After the alert is sent, the baseline is automatically updated with the new state of the file, preventing repeated alerts for a change that has already been reported.
 
-Documentation :  
-Installation et Configuration 
-Le script requiert une arborescence de dossiers spécifique pour fonctionner. Il faut créer un dossier principal pour le projet (par exemple : C:\HIDS_Project). À l'intérieur de ce dossier, un sous-dossier nommé Data doit être créé. C'est ici que les fichiers de configuration et de baseline seront stockés. Un dossier contenant les fichiers à surveiller doit exister (par exemple : C:\HIDS_Test). Fichier de configuration (HIDS-Config.json) Ce fichier définit les cibles de surveillance et les paramètres de notification. Un fichier nommé HIDS-Config.json doit être créé. Il doit être placé dans le dossier C:\HIDS_Project\Data. Ce fichier JSON doit contenir les clés 
-suivantes : 
-1) Paths : Une liste des chemins complets vers les fichiers à surveiller (en utilisant des 
-doubles anti-slash \\). 
-2) SMTPServer : L'adresse du serveur SMTP (ex: "smtp.gmail.com"). 
-SMTPPort : Le port du serveur SMTP (ex: 587). 
-3) From, Username, To : Les adresses email pour l'expédition et la réception des alertes. Fichier d'identifiants sécurisés (SMTP_Credential.xml) Pour des raisons de sécurité, le mot de passe SMTP ne doit pas être stocké en clair. Il est nécessaire d'ouvrir une console PowerShell et d'exécuter la commande $Cred = Get-Credential. Une fenêtre sécurisée demandera le nom d'utilisateur (l'email From) et le mot de passe (le mot de passe d'application généré). Cet objet PSCredential doit ensuite être exporté à l'aide de la commande suivante, en respectant le chemin attendu par le script :
+Documentation:
+Installation and Configuration
+The script requires a specific folder structure to function. A main folder must be created for the project (e.g., C:\HIDS_Project). Inside this folder, a subfolder named Data must be created. This is where the configuration and baseline files will be stored. A folder containing the files to be monitored must also exist (e.g., C:\HIDS_Test). Configuration File (HIDS-Config.json) This file defines the monitoring targets and notification parameters. A file named HIDS-Config.json must be created and placed in the C:\HIDS_Project\Data folder. This JSON file must contain the following keys:
 
-PowerShell 
-$Cred | Export-Clixml -Path "C:\HIDS_Project\Data\SMTP_Credential.xml" 
+1) Paths: A list of the full paths to the files to be monitored (using double backslashes \\).
 
-Placement du script 
-Le script HIDS-Monitor.ps1 doit être placé à la racine du dossier projet (ex: 
-C:\HIDS_Project). 
+2) SMTPServer: The address of the SMTP server (e.g., "smtp.gmail.com").
+SMTPPort: The SMTP server port (e.g., 587).
 
-Utilisation du HIDS 
-Lancement initial (Création de la Baseline) 
-Le premier lancement du script est une étape d'initialisation. Il faut exécuter le script .\HIDS-Monitor.ps1 depuis une console PowerShell. Le script détectera l'absence du 
-fichier HIDS-Baseline.dat et affichera "Baseline absente. Création initiale...". Il calculera le hash SHA256 de chaque fichier listé dans HIDS-Config.json et sauvegardera le résultat dans C:\HIDS_Project\Data\HIDS-Baseline.dat. L'opération sera confirmée par le message " Baseline initiale créée et sauvegardée.". Surveillance Active 
-Une fois la baseline créée, le script entre en mode de surveillance continue. 
-• Le message "HIDS démarré. Surveillance active et continue..." s'affichera. 
-• Toutes les 20 secondes, un message d'état "Aucun changement détecté..." 
-apparaîtra, confirmant le bon déroulement de la vérification. 
-• Pour une exécution en arrière-plan (une exigence du projet ), une idée serait de configurer une Tâche planifiée Windows pour que le script HIDS-Monitor.ps1 se 
-lançant au démarrage du système.
+3) From, Username, To: The email addresses for sending and receiving alerts. Secure credentials file (SMTP_Credential.xml): For security reasons, the SMTP password must not be stored in plain text. You must open a PowerShell console and run the command `$Cred = Get-Credential`. A secure window will prompt you for the username (the From email address) and the password (the generated application password). This PSCredential object must then be exported using the following command, respecting the path expected by the script:
 
-Gestion des Alertes 
-En cas d'anomalie, le script réagit de la manière suivante : 
-Une alerte (MODIFICATION ou SUPPRESSION) est affichée dans la console si un des fichiers surveillés est modifié (ajout ou suppression) ou supprimé. Dès lors la fonction 
-Send-HIDSAlert est déclenchée pour envoyer un email détaillé à l'administrateur (email et fichier surveillé sont définis dans le fichier de configuration). Immédiatement après l'envoi de l'alerte, la baseline (HIDS-Baseline.dat) est mise à jour avec le nouvel état (nouveau hash ou suppression de l'entrée). Cela empêche l'envoi d'alertes multiples pour un seul et même événement. Le script HIDS-Monitor.ps1 ne modifie jamais le fichier de configuration HIDS-Config.json, il ne fait que le lire. Lorsqu'un fichier surveillé est supprimé, le script envoie une alerte, puis met à jour sa baseline (HIDSBaseline.dat) en supprimant l'entrée correspondante. Si c'était le seul fichier surveillé, le script continue de tourner à vide. Pour que la surveillance reprenne, il ne suffit pas de recréer le fichier ; il faut également supprimer manuellement l'ancienne baseline et relancer le script pour qu'il la recrée à partir du fichier de configuration. 
+PowerShell
+$Cred | Export-Clixml -Path "C:\HIDS_Project\Data\SMTP_Credential.xml"
+
+Script Placement
+The HIDS-Monitor.ps1 script must be placed in the root directory of the project folder (e.g., C:\HIDS_Project).
+
+Using HIDS
+Initial Launch (Baseline Creation)
+The first time the script is run, it's an initialization step. You must run the .\HIDS-Monitor.ps1 script from a PowerShell console. The script will detect the absence of the HIDS-Baseline.dat file and display "Baseline missing. Initial creation...". It will calculate the SHA256 hash of each file listed in HIDS-Config.json and save the result to C:\HIDS_Project\Data\HIDS-Baseline.dat. The operation will be confirmed by the message "Initial Baseline created and saved.". Active Monitoring
+Once the baseline is created, the script enters continuous monitoring mode.
+
+• The message "HIDS started. Active and continuous monitoring..." will be displayed.
+
+• Every 20 seconds, a status message "No changes detected..." will appear, confirming that the check is running successfully.
+
+• For background execution (a project requirement), one approach would be to configure a Windows scheduled task so that the HIDS-Monitor.ps1 script starts
+when the system boots.
+
+Alert Management
+In case of an anomaly, the script reacts as follows:
+An alert (MODIFICATION or DELETION) is displayed in the console if one of the monitored files is modified (added or deleted) or deleted. The
+Send-HIDSAlert function is then triggered to send a detailed email to the administrator (email and monitored file are defined in the configuration file). Immediately after the alert is sent, the baseline (HIDS-Baseline.dat) is updated with the new state (new hash or deletion of the entry). This prevents multiple alerts from being sent for the same event. The HIDS-Monitor.ps1 script never modifies the HIDS-Config.json configuration file; it only reads it. When a monitored file is deleted, the script sends an alert and then updates its baseline (HIDSBaseline.dat) by deleting the corresponding entry. If this was the only monitored file, the script continues to run without executing any further actions. To resume monitoring, simply recreating the file is not enough; the old baseline must also be manually deleted, and the script must be rerun to recreate it from the configuration file.
