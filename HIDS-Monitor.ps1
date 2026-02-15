@@ -3,7 +3,7 @@ $ConfigFilePath = "$DataDir\HIDS-Config.json"
 $CredentialFilePath = "$DataDir\SMTP_Credential.xml"
 $BaselineFile = "$DataDir\HIDS-Baseline.dat"
 
-# --- 2. Fonction : Calculer le hash SHA256 d’un fichier ---
+# --- Calculer le hash SHA256 d’un fichier ---
 function Get-IntegrityHash {
     param(
         [Parameter(Mandatory = $true)]
@@ -16,7 +16,7 @@ function Get-IntegrityHash {
     }
 }
 
-# --- 3. Fonction : Envoi d’une alerte e-mail sécurisée ---
+# --- Envoi d’une alerte e-mail sécurisée ---
 function Send-HIDSAlert {
     param(
         [Parameter(Mandatory = $true)]
@@ -67,7 +67,7 @@ function Send-HIDSAlert {
     }
 }
 
-# --- 4. Chargement ou création de la baseline ---
+# --- Chargement ou création de la baseline ---
 try {
     $Config = Get-Content $ConfigFilePath -Raw | ConvertFrom-Json
     $PathsToMonitor = $Config.Paths
@@ -96,7 +96,7 @@ if (-not (Test-Path $BaselineFile)) {
     $Baseline = Import-Clixml $BaselineFile
 }
 
-# --- 5. Boucle principale de surveillance ---
+# --- Boucle principale de surveillance ---
 Write-Host "HIDS démarré. Surveillance active et continue..." -ForegroundColor Green
 
 while ($true) {
@@ -136,3 +136,4 @@ while ($true) {
 
     Start-Sleep -Seconds 20
 }
+
