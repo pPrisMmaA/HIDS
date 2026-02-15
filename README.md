@@ -39,3 +39,14 @@ Gestion des Alertes
 En cas d'anomalie, le script réagit de la manière suivante : 
 Une alerte (MODIFICATION ou SUPPRESSION) est affichée dans la console si un des fichiers surveillés est modifié (ajout ou suppression) ou supprimé. Dès lors la fonction 
 Send-HIDSAlert est déclenchée pour envoyer un email détaillé à l'administrateur (email et fichier surveillé sont définis dans le fichier de configuration). Immédiatement après l'envoi de l'alerte, la baseline (HIDS-Baseline.dat) est mise à jour avec le nouvel état (nouveau hash ou suppression de l'entrée). Cela empêche l'envoi d'alertes multiples pour un seul et même événement. Le script HIDS-Monitor.ps1 ne modifie jamais le fichier de configuration HIDS-Config.json, il ne fait que le lire. Lorsqu'un fichier surveillé est supprimé, le script envoie une alerte, puis met à jour sa baseline (HIDSBaseline.dat) en supprimant l'entrée correspondante. Si c'était le seul fichier surveillé, le script continue de tourner à vide. Pour que la surveillance reprenne, il ne suffit pas de recréer le fichier ; il faut également supprimer manuellement l'ancienne baseline et relancer le script pour qu'il la recrée à partir du fichier de configuration. 
+
+Structure complète du dossier
+
+C:\HIDS_Project\
+│
+├── Data\
+│   ├── HIDS-Config.json          ← À créer manuellement
+│   ├── SMTP_Credential.xml       ← À créer avec le script PowerShell
+│   └── HIDS-Baseline.dat         ← Créé automatiquement au 1er lancement
+│
+└── HIDS-Monitor.ps1               ← Le script principal
