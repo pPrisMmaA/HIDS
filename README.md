@@ -1,6 +1,24 @@
 # HIDS
 The goal of this project was to develop a Host-based Intrusion Detection System (HIDS) using PowerShell. 
 
+Complete Directory Structure
+
+C:\HIDS_Project\
+│
+
+├── Data\
+
+│   ├── HIDS-Config.json          ← To create manually
+
+│   ├── SMTP_Credential.xml       ← To create with with PowerShell 
+
+│   └── HIDS-Baseline.dat         ← Automatically created during the first execution of HIDS-Monitor.ps1
+
+│
+
+└── HIDS-Monitor.ps1               ← Main script
+
+
 This system is designed to monitor the integrity of specific files and send email alerts to an administrator as soon as a change is detected. To achieve this, I separated the architecture into several components for greater clarity and security. The core engine is the HIDS-Monitor.ps1 script, which contains all the monitoring logic. Parameters, such as the paths of the files to monitor and the SMTP server information, are stored in an external JSON configuration file named HIDS-Config.json. SMTP credentials are managed securely using an SMTP_Credential.xml file, which stores the password in encrypted form. Integrity verification relies on a baseline named HIDS-Baseline.dat. This baseline is created the first time the HIDS-Monitor.ps1 script is run. The script calculates the SHA256 cryptographic hash of each target file using the Get-IntegrityHash function and stores these hashes in the HIDS-Baseline.dat file.
 
 Once this baseline is established, the script enters a continuous monitoring loop (while ($true)). At regular intervals, it recalculates the hash of each file and compares it to the one stored in the baseline. If a hash differs, the script identifies a "CHANGE". If a file is inaccessible or deleted, the hash function returns a null value, which is interpreted as a "DELETION".
@@ -39,20 +57,3 @@ Gestion des Alertes
 En cas d'anomalie, le script réagit de la manière suivante : 
 Une alerte (MODIFICATION ou SUPPRESSION) est affichée dans la console si un des fichiers surveillés est modifié (ajout ou suppression) ou supprimé. Dès lors la fonction 
 Send-HIDSAlert est déclenchée pour envoyer un email détaillé à l'administrateur (email et fichier surveillé sont définis dans le fichier de configuration). Immédiatement après l'envoi de l'alerte, la baseline (HIDS-Baseline.dat) est mise à jour avec le nouvel état (nouveau hash ou suppression de l'entrée). Cela empêche l'envoi d'alertes multiples pour un seul et même événement. Le script HIDS-Monitor.ps1 ne modifie jamais le fichier de configuration HIDS-Config.json, il ne fait que le lire. Lorsqu'un fichier surveillé est supprimé, le script envoie une alerte, puis met à jour sa baseline (HIDSBaseline.dat) en supprimant l'entrée correspondante. Si c'était le seul fichier surveillé, le script continue de tourner à vide. Pour que la surveillance reprenne, il ne suffit pas de recréer le fichier ; il faut également supprimer manuellement l'ancienne baseline et relancer le script pour qu'il la recrée à partir du fichier de configuration. 
-
-Structure complète du dossier
-
-C:\HIDS_Project\
-│
-
-├── Data\
-
-│   ├── HIDS-Config.json          ← À créer manuellement
-
-│   ├── SMTP_Credential.xml       ← À créer avec le script PowerShell
-
-│   └── HIDS-Baseline.dat         ← Créé automatiquement au 1er lancement
-
-│
-
-└── HIDS-Monitor.ps1               ← Le script principal
